@@ -43,6 +43,8 @@ class DQN(nn.Module):
         self.anneal_length = env_config["anneal_length"]
         self.n_actions = env_config["n_actions"]
 
+        self.steps_done = 0 # !!
+        
         self.fc1 = nn.Linear(4, 256)
         self.fc2 = nn.Linear(256, self.n_actions)
 
@@ -64,7 +66,22 @@ class DQN(nn.Module):
         #       the input would be a [32, 4] tensor and the output a [32, 1] tensor.
         # TODO: Implement epsilon-greedy exploration.
 
-        raise NotImplmentedError
+        # !! !!
+        sample = random.random()
+        eps_threshold = self.get_eps_threshold()
+        self.steps_done += 1
+        if exploit or sample > eps_threshold: # exploit
+            with torch.no_grad():
+                return torch.argmax(self.forward(observation), dim=1).unsqueeze(1)
+        else: # explore
+            return torch.randint(0, self.n_actions, (self.batch_size, 1), device=observation.device) 
+            
+        # !! !!
+
+    
+    def get_eps_threshold(self):
+        eps_decay = (self.eps_start - self.eps_end) / self.anneal_length
+        return max(self.eps_end, self.eps_start - (self.step.done * eps_decay) )
 
 def optimize(dqn, target_dqn, memory, optimizer):
     """This function samples a batch from the replay buffer and optimizes the Q-network."""
@@ -93,3 +110,5 @@ def optimize(dqn, target_dqn, memory, optimizer):
     optimizer.step()
 
     return loss.item()
+
+
