@@ -30,7 +30,8 @@ if __name__ == '__main__':
     # Initialize deep Q-networks.
     dqn = DQN(env_config=env_config).to(device)
     # TODO: Create and initialize target Q-network.
-
+    dqn_target = DQN(env_config=env_config).to(device)
+    dqn_target.load_state_dict(dqn.state_dict()) # Copies weights from dqn
     # Create replay memory.
     memory = ReplayMemory(env_config['memory_size'])
 
