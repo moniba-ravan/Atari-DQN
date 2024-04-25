@@ -69,8 +69,9 @@ class DQN(nn.Module):
         # !! !!
         sample = random.random()
         eps_threshold = self.get_eps_threshold()
+        self.steps_done += 1 # ????????????????????????????????????????????????????
         if exploit or sample > eps_threshold: # exploit
-            with torch.no_grad():
+            with torch.no_grad(): # Disable gradient computation during exploitation
                 return torch.argmax(self.forward(observation), dim=1).unsqueeze(1)
         else: # explore
             return torch.randint(0, self.n_actions, (self.batch_size, 1), device=observation.device) 
@@ -82,46 +83,50 @@ class DQN(nn.Module):
         eps_decay = (self.eps_start - self.eps_end) / self.anneal_length
         return max(self.eps_end, self.eps_start - (self.steps_done * eps_decay) )
 
-def optimize(dqn, target_dqn, memory, optimizer):
-    """This function samples a batch from the replay buffer and optimizes the Q-network."""
-    # If we don't have enough transitions stored yet, we don't train.
-    if len(memory) < dqn.batch_size:
-        return
+    def optimize(dqn, target_dqn, memory, optimizer):
+        """This function samples a batch from the replay buffer and optimizes the Q-network."""
+        # If we don't have enough transitions stored yet, we don't train.
+        if len(memory) < dqn.batch_size:
+            return
 
-    # TODO: Sample a batch from the replay memory and concatenate so that there are
-    #       four tensors in total: observations, actions, next observations and rewards.
-    #       Remember to move them to GPU if it is available, e.g., by using Tensor.to(device).
-    #       Note that special care is needed for terminal transitions! 
+        # TODO: Sample a batch from the replay memory and concatenate so that there are
+        #       four tensors in total: observations, actions, next observations and rewards.
+        #       Remember to move them to GPU if it is available, e.g., by using Tensor.to(device).
+        #       Note that special care is needed for terminal transitions! 
 
-    observations, actions, next_observations, rewards = memory.sample(dqn.batch_size)
-    observations = torch.tensor(observations).to(device)
-    actions = torch.tensor(actions).to(device)
-    next_observation = torch.tensor(next_observation).to(device)
-    rewards = torch.tensor(rewards).to(device)
+        observations, actions, next_observations, rewards = memory.sample(dqn.batch_size)
+        observations = torch.tensor(observations).to(device)
+        actions = torch.tensor(actions).to(device)
+        next_observation = torch.tensor(next_observation).to(device)
+        rewards = torch.tensor(rewards).to(device)
 
-    # TODO: Compute the current estimates of the Q-values for each state-action
-    #       pair (s,a). Here, torch.gather() is useful for selecting the Q-values
-    #       corresponding to the chosen actions.
-    q_values = dqn(observations)
-    q_values = torch.gather(q_values, 1, actions.unsqueeze(1))
-    # TODO: Compute the Q-value targets. Only do this for non-terminal transitions!
-    
-    # state 0: (-2.4, 2.4), and 2: (-.2095,.2095) otherwise terminate
-    next_q_values = torch.max((target_dqn(next_observations)), 1)[0]
-    
-    for index, observation in enumerate(observations):
-        if abs(observation[0]) > 2.4 or abs(observation[2])> 0.2095:
-            next_q_values[index] = 0
-    q_value_targets = rewards + target_dqn.gamma*next_q_values
-    # Compute loss.
-    loss = F.mse_loss(q_values.squeeze(), q_value_targets)
+        if (next_observation == 0).any().item():
+            return
+        
+        # TODO: Compute the current estimates of the Q-values for each state-action
+        #       pair (s,a). Here, torch.gather() is useful for selecting the Q-values
+        #       corresponding to the chosen actions.
+        q_values = dqn(observations)
+        q_values = torch.gather(q_values, 1, actions.unsqueeze(1))
+        # TODO: Compute the Q-value targets. Only do this for non-terminal transitions!
+        
+        # state 0: (-2.4, 2.4), and 2: (-.2095,.2095) otherwise terminate
+        next_q_values = torch.max((target_dqn(next_observations)), 1)[0]
+        
+        # for index, observation in enumerate(observations):
+        #     if abs(observation[0]) > 2.4 or abs(observation[2])> 0.2095:
+        #         next_q_values[index] = 0
+        
+        q_value_targets = rewards + target_dqn.gamma*next_q_values
+        # Compute loss.
+        loss = F.mse_loss(q_values.squeeze(), q_value_targets)
 
-    # Perform gradient descent.
-    optimizer.zero_grad()
+        # Perform gradient descent.
+        optimizer.zero_grad()
 
-    loss.backward()
-    optimizer.step()
+        loss.backward()
+        optimizer.step()
 
-    return loss.item()
+        return loss.item()
 
 
