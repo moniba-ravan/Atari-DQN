@@ -30,8 +30,9 @@ if __name__ == '__main__':
     # Initialize deep Q-networks.
     dqn = DQN(env_config=env_config).to(device)
     # TODO: Create and initialize target Q-network.
-    dqn_target = DQN(env_config=env_config).to(device)
-    dqn_target.load_state_dict(dqn.state_dict()) # Copies weights from dqn
+    target_dqn = DQN(env_config=env_config).to(device)
+    target_dqn.load_state_dict(dqn.state_dict()) # Copies weights from dqn
+    
     # Create replay memory.
     memory = ReplayMemory(env_config['memory_size'])
 
@@ -49,17 +50,30 @@ if __name__ == '__main__':
         
         while not terminated:
             # TODO: Get action from DQN.
-            action = None
+            action = dqn.act(obs)
 
             # Act in the true environment.
-            obs, reward, terminated, truncated, info = env.step(action)
+            next_obs, reward, terminated, truncated, info = env.step(action)
 
             # Preprocess incoming observation.
             if not terminated:
-                obs = preprocess(obs, env=args.env).unsqueeze(0)
+                next_obs = preprocess(next_obs, env=args.env).unsqueeze(0)
             
             # TODO: Add the transition to the replay memory. Remember to convert
             #       everything to PyTorch tensors!
+            
+            if terminated:
+                next_obs = 0
+
+            action = torch.tensor(action, device=device).float()
+            next_obs = torch.tensor(next_obs, device=device).float()
+            reward = torch.tensor(reward, device=device).float()
+
+            memory.push(obs,
+                        action,
+                        next_obs,
+                        reward,
+                        )
 
             # TODO: Run DQN.optimize() every env_config["train_frequency"] steps.
 
