@@ -1,0 +1,6 @@
+# Ignore Python bytecode cache
+__pycache__/
+
+# Ignore specific Python files
+extra.py
+test.py
