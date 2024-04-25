@@ -54,17 +54,16 @@ if __name__ == '__main__':
         while not terminated:
             # TODO: Get action from DQN.
             action = dqn.act(obs).item() # !!
-            # print("action:\n", action.shape,"obs:\n", obs.shape)
+
             # Act in the true environment.
             next_obs, reward, terminated, truncated, info = env.step(action)
 
             # Preprocess incoming observation.
             if not terminated: 
                 next_obs = preprocess(next_obs, env=args.env).unsqueeze(0)
-                # print("not: ", next_obs)
-            else:
-                next_obs = torch.tensor(next_obs, device=device).float().unsqueeze(0)
-                # print("terminal: ", next_obs)
+            else: # !!
+                # Convert terminal state to torch
+                next_obs = torch.tensor(next_obs, device=device).float().unsqueeze(0) # !!
             
             # TODO: Add the transition to the replay memory. Remember to convert
             #       everything to PyTorch tensors!
@@ -123,9 +122,6 @@ if __name__ == '__main__':
                     # Create the directory
                     os.makedirs(directory)
                     print(f"Directory '{directory}' created successfully.")
-                else:
-                    print(f"Directory '{directory}' already exists.")
-
                 # !!
                 torch.save(dqn, f'{directory}/{args.env}_best.pt')
         

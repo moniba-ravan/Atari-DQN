@@ -15,7 +15,7 @@ class ReplayMemory:
     def __len__(self):
         return len(self.memory)
 
-    def push(self, obs, action, next_obs, reward, terminated):
+    def push(self, obs, action, next_obs, reward, terminated): # adding terminated argument
         if len(self.memory) < self.capacity:
             self.memory.append(None)
 
@@ -97,8 +97,6 @@ def optimize(dqn, target_dqn, memory, optimizer):
     observations, actions, next_observations, rewards, terminated = memory.sample(dqn.batch_size)
 
     observations = torch.cat(observations, dim=0).to(device)
-    # print("Shape:", observations.shape, actions.shape, type(next_observations[0]), type(rewards[0]), type(terminated[0]))
-    # print("Values:", observations, actions[0], next_observations[0], rewards[0], terminated[0])
 
     actions = torch.tensor(actions).to(device)
     next_observations = torch.cat(next_observations, dim=0).to(device)
