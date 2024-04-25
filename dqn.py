@@ -74,7 +74,7 @@ class DQN(nn.Module):
             with torch.no_grad(): # Disable gradient computation during exploitation
                 return torch.argmax(self.forward(observation), dim=1).unsqueeze(1)
         else: # explore
-            return torch.randint(0, self.n_actions, (self.batch_size, 1), device=observation.device) 
+            return torch.randint(0, self.n_actions, (self.batch_size, 1), device=device) 
             
         # !! !!
 
