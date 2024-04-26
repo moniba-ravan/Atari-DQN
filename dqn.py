@@ -15,11 +15,11 @@ class ReplayMemory:
     def __len__(self):
         return len(self.memory)
 
-    def push(self, obs, action, next_obs, reward):
+    def push(self, obs, action, next_obs, reward, terminated): # adding terminated argument
         if len(self.memory) < self.capacity:
             self.memory.append(None)
 
-        self.memory[self.position] = (obs, action, next_obs, reward)
+        self.memory[self.position] = (obs, action, next_obs, reward, terminated)
         self.position = (self.position + 1) % self.capacity
 
     def sample(self, batch_size):
@@ -42,9 +42,9 @@ class DQN(nn.Module):
         self.eps_end = env_config["eps_end"]
         self.anneal_length = env_config["anneal_length"]
         self.n_actions = env_config["n_actions"]
-
-        self.steps_done = 0 # !!
         
+        self.eps_threshold = self.eps_start # !!
+
         self.fc1 = nn.Linear(4, 256)
         self.fc2 = nn.Linear(256, self.n_actions)
 
@@ -55,7 +55,6 @@ class DQN(nn.Module):
         """Runs the forward pass of the NN depending on architecture."""
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
-
         return x
 
     def act(self, observation, exploit=False):
@@ -68,19 +67,20 @@ class DQN(nn.Module):
 
         # !! !!
         sample = random.random()
-        eps_threshold = self.get_eps_threshold()
-        if exploit or sample > eps_threshold: # exploit
-            with torch.no_grad():
+        
+        if exploit or sample > self.eps_threshold: # exploit
+            with torch.no_grad(): # Disable gradient computation during exploitation
                 return torch.argmax(self.forward(observation), dim=1).unsqueeze(1)
         else: # explore
-            return torch.randint(0, self.n_actions, (self.batch_size, 1), device=observation.device) 
+            return torch.randint(0, self.n_actions, (observation.shape[0], 1), device=device) 
             
         # !! !!
 
     
-    def get_eps_threshold(self):
+    def update_eps_threshold(self):
         eps_decay = (self.eps_start - self.eps_end) / self.anneal_length
-        return max(self.eps_end, self.eps_start - (self.steps_done * eps_decay) )
+        self.eps_threshold = max(self.eps_end, self.eps_threshold - eps_decay)
+
 
 def optimize(dqn, target_dqn, memory, optimizer):
     """This function samples a batch from the replay buffer and optimizes the Q-network."""
@@ -92,29 +92,43 @@ def optimize(dqn, target_dqn, memory, optimizer):
     #       four tensors in total: observations, actions, next observations and rewards.
     #       Remember to move them to GPU if it is available, e.g., by using Tensor.to(device).
     #       Note that special care is needed for terminal transitions! 
+    
+    # !!
+    observations, actions, next_observations, rewards, terminated = memory.sample(dqn.batch_size)
 
-    observations, actions, next_observations, rewards = memory.sample(dqn.batch_size)
-    observations = torch.tensor(observations).to(device)
+    observations = torch.cat(observations, dim=0).to(device)
+
     actions = torch.tensor(actions).to(device)
-    next_observation = torch.tensor(next_observation).to(device)
+    next_observations = torch.cat(next_observations, dim=0).to(device)
     rewards = torch.tensor(rewards).to(device)
-
+    terminated = torch.tensor(terminated).to(device)
+    
+    if terminated.any().item():
+        return 
+    
     # TODO: Compute the current estimates of the Q-values for each state-action
     #       pair (s,a). Here, torch.gather() is useful for selecting the Q-values
     #       corresponding to the chosen actions.
-    q_values = dqn(observations)
-    q_values = torch.gather(q_values, 1, actions.unsqueeze(1))
+    all_q_values = dqn.forward(observations) # output: 32 * n_actions
+    chosen_q_values = torch.gather(all_q_values, 1, actions.unsqueeze(1)) # action.unsqeee(1) 32 * 1
+
     # TODO: Compute the Q-value targets. Only do this for non-terminal transitions!
     
-    # state 0: (-2.4, 2.4), and 2: (-.2095,.2095) otherwise terminate
-    next_q_values = torch.max((target_dqn(next_observations)), 1)[0]
     
-    for index, observation in enumerate(observations):
-        if abs(observation[0]) > 2.4 or abs(observation[2])> 0.2095:
-            next_q_values[index] = 0
+    next_q_values = torch.max((target_dqn.forward(next_observations)), 1)[0]
+    # print(f"target q value: {next_q_values}")
+    
+    # state 0: (-2.4, 2.4), and 2: (-.2095,.2095) otherwise terminate
+    # for index, observation in enumerate(observations):
+    #     if abs(observation[0]) > 2.4 or abs(observation[2])> 0.2095:
+    #         next_q_values[index] = 0
+    
     q_value_targets = rewards + target_dqn.gamma*next_q_values
+
+    # !!
+
     # Compute loss.
-    loss = F.mse_loss(q_values.squeeze(), q_value_targets)
+    loss = F.mse_loss(chosen_q_values.squeeze(), q_value_targets)
 
     # Perform gradient descent.
     optimizer.zero_grad()
