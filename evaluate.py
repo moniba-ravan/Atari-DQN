@@ -2,14 +2,14 @@ import argparse
 
 import gymnasium as gym
 import torch
-
+import numpy as np
 import config
 from utils import preprocess
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env', choices=['CartPole-v1'], default='CartPole-v1')
+parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")
 parser.add_argument('--path', type=str, help='Path to stored DQN model.')
 parser.add_argument('--n_eval_episodes', type=int, default=1, help='Number of evaluation episodes.', nargs='?')
 parser.add_argument('--render', dest='render', action='store_true', help='Render the environment.')
@@ -19,6 +19,7 @@ parser.set_defaults(save_video=False)
 
 # Hyperparameter configurations for different environments. See config.py.
 ENV_CONFIGS = {
+    'ALE/Pong-v5': config.PONG,
     'CartPole-v1': config.CartPole,
 }
 
@@ -28,19 +29,32 @@ def evaluate_policy(dqn, env, env_config, args, n_episodes, render=False, verbos
     total_return = 0
     for i in range(n_episodes):
         obs, info = env.reset()
-        obs = preprocess(obs, env=args.env).unsqueeze(0)
-
+        obs = torch.tensor(np.array(obs), device=device).float().unsqueeze(0)
+        # obs_stack = torch.cat(dqn.obs_stack_size * [obs]).unsqueeze(0).to(device)
+        # print(f"obs from env.resest(): {obs.size()}")
         terminated = False
+        truncated = False
+
         episode_return = 0
 
-        while not terminated:
+        while not terminated and not truncated:
             if render:
                 env.render()
-
+            
             action = dqn.act(obs, exploit=True).item()
-            obs, reward, terminated, truncated, info = env.step(action)
-            obs = preprocess(obs, env=args.env).unsqueeze(0)
-
+            
+            if args.env == 'ALE/Pong-v5':
+                # 2, 3
+                if action == 0:
+                        transformed_action = torch.tensor([2], device=device) # UP
+                else:
+                    transformed_action = torch.tensor([3], device=device) # DOWN
+            else:
+                transformed_action = action
+            obs, reward, terminated, truncated, info = env.step(transformed_action)
+            
+            obs = torch.tensor(np.array(obs), device=device).float().unsqueeze(0)
+            # print(f"obs: {obs.size()}")
             episode_return += reward
         
         total_return += episode_return
@@ -63,7 +77,7 @@ if __name__ == '__main__':
         env = gym.wrappers.RecordVideo(env, './video/', episode_trigger=lambda episode_id: True)
 
     # Load model from provided path.
-    dqn = torch.load(args.path, map_location=torch.device('cpu'))
+    dqn = torch.load(args.path, map_location=torch.device(device))
     dqn.eval()
 
     mean_return = evaluate_policy(dqn, env, env_config, args, args.n_eval_episodes, render=args.render and not args.save_video, verbose=True)
