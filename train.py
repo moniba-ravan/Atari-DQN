@@ -11,7 +11,7 @@ from dqn import DQN, ReplayMemory, optimize
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env', choices=["ALE/Pong-v5"], default="ALE/Pong-v5")
+parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")
 parser.add_argument('--evaluate_freq', type=int, default=25, help='How often to run evaluation.', nargs='?')
 parser.add_argument('--evaluation_episodes', type=int, default=5, help='Number of evaluation episodes.', nargs='?')
 
@@ -26,10 +26,11 @@ if __name__ == '__main__':
 
     # Initialize environment and config.
     env = gym.make(args.env)
+    env_config = ENV_CONFIGS[args.env]
     if args.env == 'ALE/Pong-v5':
         env = gym.wrappers.AtariPreprocessing(env, screen_size=84, grayscale_obs=True, frame_skip=1, noop_max=30, scale_obs = True)
-        env = gym.wrappers.FrameStack(env, 4)
-    env_config = ENV_CONFIGS[args.env]
+        env = gym.wrappers.FrameStack(env, env_config['obs_stack_size'])
+    
 
     # Initialize deep Q-networks.
     dqn = DQN(env_config=env_config).to(device)
@@ -61,10 +62,12 @@ if __name__ == '__main__':
                 # Act in the true environment.
                 # 2, 3
                 if action == 0:
-                        transformed_action = torch.tensor([2], device=device) # UP
+                    transformed_action = torch.tensor([2], device=device) # UP
                 else:
                     transformed_action = torch.tensor([3], device=device) # DOWN
-
+            else:
+                transformed_action = action
+                
             next_obs, reward, terminated, truncated, info = env.step(transformed_action)
 
             # Preprocess incoming observation.

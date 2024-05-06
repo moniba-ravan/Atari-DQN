@@ -49,7 +49,8 @@ def evaluate_policy(dqn, env, env_config, args, n_episodes, render=False, verbos
                         transformed_action = torch.tensor([2], device=device) # UP
                 else:
                     transformed_action = torch.tensor([3], device=device) # DOWN
-            
+            else:
+                transformed_action = action
             obs, reward, terminated, truncated, info = env.step(transformed_action)
             
             obs = torch.tensor(np.array(obs), device=device).float().unsqueeze(0)

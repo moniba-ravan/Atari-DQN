@@ -36,7 +36,8 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
 
         # Save hyperparameters needed in the DQN class.
-        self.obs_stack_size = env_config["obs_stack_size"]
+        # self.obs_stack_size = env_config["obs_stack_size"]
+        self.env = env_config["env_name"]
         self.batch_size = env_config["batch_size"]
         self.gamma = env_config["gamma"]
         self.eps_start = env_config["eps_start"]
@@ -55,23 +56,30 @@ class DQN(nn.Module):
         # Flatten layer
         self.flatten = nn.Flatten()
 
-        # Fully connected layers
-        self.fc1 = nn.Linear(3136, 512)  # Adjust the input features according to your input size calculation
-        self.fc2 = nn.Linear(512, self.n_actions)
+        # Fully connected layers 
+        # For Cartpole
+        self.fc1 = nn.Linear(4, 256)
+        self.fc2 = nn.Linear(256, self.n_actions)
+        # For PONG
+        self.fc3 = nn.Linear(3136, 512)  # Adjust the input features according to your input size calculation
+        self.fc4 = nn.Linear(512, self.n_actions)
 
     def forward(self, x):
-        # Apply convolutional layers with ReLU activations
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
+        if self.env == 'ALE/Pong-v5':
+            # Apply convolutional layers with ReLU activations
+            x = F.relu(self.conv1(x))
+            x = F.relu(self.conv2(x))
+            x = F.relu(self.conv3(x))
 
-        # Flatten the output from the conv layers
-        x = self.flatten(x)
-        # print(f"size: {x.size()}")
-        # Apply fully connected layers
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)  # No activation function here as this is the output layer
-
+            # Flatten the output from the conv layers
+            x = self.flatten(x)
+            # print(f"size: {x.size()}")
+            # Apply fully connected layers
+            x = F.relu(self.fc3(x))
+            x = self.fc4(x)  # No activation function here as this is the output layer
+        elif self.env == 'CartPole-v1':
+            x = F.relu(self.fc1(x))
+            x = self.fc2(x)
         return x
     
     def update_eps_threshold(self):
@@ -97,7 +105,6 @@ class DQN(nn.Module):
             action = torch.tensor(random.choice([0,1]), device=observation.device)  # Random action
 
         return action
-        #raise NotImplmentedError
 
 def optimize(dqn, target_dqn, memory, optimizer):
     """This function samples a batch from the replay buffer and optimizes the Q-network."""
@@ -128,7 +135,7 @@ def optimize(dqn, target_dqn, memory, optimizer):
     next_q_values[terminated] = 0  # Zero Q value for terminated states
 
     # Compute the target of the current Q values
-    target_q_values = rewards + (dqn.gamma * next_q_values)
+    target_q_values = rewards + (target_dqn.gamma * next_q_values)
 
     # Compute the loss (Mean Squared Error)
     loss = F.mse_loss(current_q_values.squeeze(), target_q_values)
