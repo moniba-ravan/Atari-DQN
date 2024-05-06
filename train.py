@@ -7,6 +7,7 @@ import os
 from utils import preprocess
 from evaluate import evaluate_policy
 from dqn import DQN, ReplayMemory, optimize
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -45,6 +46,7 @@ if __name__ == '__main__':
 
     # Keep track of best evaluation mean return achieved so far.
     best_mean_return = -float("Inf")
+    mean_returns = []
     steps_done = 0
     for episode in range(env_config['n_episodes']):
         terminated = False
@@ -115,6 +117,7 @@ if __name__ == '__main__':
         if episode % args.evaluate_freq == 0:
             mean_return = evaluate_policy(dqn, env, env_config, args, n_episodes=args.evaluation_episodes)
             print(f'Episode {episode+1}/{env_config["n_episodes"]}: {mean_return}')
+            mean_returns.append(mean_return)
 
             # Save current agent if it has the best performance so far.
             if mean_return >= best_mean_return:
@@ -122,6 +125,17 @@ if __name__ == '__main__':
                 os.makedirs('models/ALE', exist_ok=True)
                 print('Best performance so far! Saving model.')
                 torch.save(dqn, f'models/{args.env}_best.pt')
-        
+    #PLOT
+    evaluation_episodes = [1 + args.evaluate_freq * index for index in range(len(mean_returns))]
+    plt.plot(evaluation_episodes, mean_returns)
+    plt.xlabel("Episode")
+    plt.ylabel("Mean Return")
+    plt.title("Evaluated mean returns")
+    if args.env == 'ALE/Pong-v5':
+        plt.savefig("PONG_mean_returns_plot.png")
+        plt.savefig("PONG_mean_returns_plot.eps")
+    else:
+        plt.savefig("CARTPOLE_mean_returns_plot.png") 
+        plt.savefig("CARTPOLE_mean_returns_plot.eps")   
     # Close environment after training is completed.
     env.close()
