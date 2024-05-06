@@ -7,6 +7,7 @@ import config
 from utils import preprocess
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cpu")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")

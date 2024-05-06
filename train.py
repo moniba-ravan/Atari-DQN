@@ -4,13 +4,13 @@ import gymnasium as gym
 import torch
 import config
 import os
-from utils import preprocess
+from utils import preprocess, append_to_csv
 from evaluate import evaluate_policy
 from dqn import DQN, ReplayMemory, optimize
 import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+device = torch.device("cpu")
 parser = argparse.ArgumentParser()
 parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")
 parser.add_argument('--evaluate_freq', type=int, default=25, help='How often to run evaluation.', nargs='?')
@@ -125,6 +125,7 @@ if __name__ == '__main__':
                 os.makedirs('models/ALE', exist_ok=True)
                 print('Best performance so far! Saving model.')
                 torch.save(dqn, f'models/{args.env}_best.pt')
+    append_to_csv(env_config, mean_returns)
     #PLOT
     evaluation_episodes = [1 + args.evaluate_freq * index for index in range(len(mean_returns))]
     plt.plot(evaluation_episodes, mean_returns)
