@@ -17,17 +17,19 @@ parser.add_argument('--evaluation_episodes', type=int, default=5, help='Number o
 
 # Hyperparameter configurations for different environments. See config.py.
 ENV_CONFIGS = {
-    'ALE/Pong-v5': config.PONG
+    'ALE/Pong-v5': config.PONG,
+    'CartPole-v1': config.CartPole
 }
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
     # Initialize environment and config.
-    env = gym.make("ALE/Pong-v5")
-    env = gym.wrappers.AtariPreprocessing(env, screen_size=84, grayscale_obs=True, frame_skip=1, noop_max=30, scale_obs = True)
-    env = gym.wrappers.FrameStack(env, 4)
-    env_config = ENV_CONFIGS["ALE/Pong-v5"]
+    env = gym.make(args.env)
+    if args.env == 'ALE/Pong-v5':
+        env = gym.wrappers.AtariPreprocessing(env, screen_size=84, grayscale_obs=True, frame_skip=1, noop_max=30, scale_obs = True)
+        env = gym.wrappers.FrameStack(env, 4)
+    env_config = ENV_CONFIGS[args.env]
 
     # Initialize deep Q-networks.
     dqn = DQN(env_config=env_config).to(device)
@@ -45,26 +47,34 @@ if __name__ == '__main__':
     steps_done = 0
     for episode in range(env_config['n_episodes']):
         terminated = False
+        truncated = False
         obs, info = env.reset()
         obs = torch.tensor(np.array(obs), device=device).float().unsqueeze(0)
         # print(f"obs from env.resest(): {obs}")
         
-        while not terminated:
+        while not terminated and not truncated:
             # TODO: Get action from DQN.
             action = dqn.act(obs).item()
             # print(f"action: {action}")
-            # Act in the true environment.
-            # 2, 3
-            if action == 0:
-                    transformed_action = torch.tensor([2], device=device) # UP
-            else:
-                transformed_action = torch.tensor([3], device=device) # DOWN
+
+            if args.env == 'ALE/Pong-v5':
+                # Act in the true environment.
+                # 2, 3
+                if action == 0:
+                        transformed_action = torch.tensor([2], device=device) # UP
+                else:
+                    transformed_action = torch.tensor([3], device=device) # DOWN
 
             next_obs, reward, terminated, truncated, info = env.step(transformed_action)
 
             # Preprocess incoming observation.
-            # if not terminated:
-            next_obs = torch.tensor(np.array(next_obs), device=device).float().unsqueeze(0)
+            if not terminated and not truncated: 
+                # next_obs = preprocess(np.array(next_obs), env=args.env).float().unsqueeze(0)
+                next_obs = torch.tensor(np.array(next_obs), device=device).float().unsqueeze(0)
+            else: # !!
+                # Convert terminal state to torch
+                next_obs = torch.tensor(np.array(next_obs), device=device).float().unsqueeze(0)
+            
             # print(f"next_obs dim: {next_obs.size()}")
     
             

@@ -9,7 +9,7 @@ from utils import preprocess
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env', choices=["ALE/Pong-v5"], default="ALE/Pong-v5")
+parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")
 parser.add_argument('--path', type=str, help='Path to stored DQN model.')
 parser.add_argument('--n_eval_episodes', type=int, default=1, help='Number of evaluation episodes.', nargs='?')
 parser.add_argument('--render', dest='render', action='store_true', help='Render the environment.')
@@ -20,6 +20,7 @@ parser.set_defaults(save_video=False)
 # Hyperparameter configurations for different environments. See config.py.
 ENV_CONFIGS = {
     'ALE/Pong-v5': config.PONG,
+    'CartPole-v1': config.CartPole,
 }
 
 
@@ -32,19 +33,25 @@ def evaluate_policy(dqn, env, env_config, args, n_episodes, render=False, verbos
         # obs_stack = torch.cat(dqn.obs_stack_size * [obs]).unsqueeze(0).to(device)
         # print(f"obs from env.resest(): {obs.size()}")
         terminated = False
+        truncated = False
+
         episode_return = 0
 
-        while not terminated:
+        while not terminated and not truncated:
             if render:
                 env.render()
             
             action = dqn.act(obs, exploit=True).item()
-            # 2, 3
-            if action == 0:
-                    transformed_action = torch.tensor([2], device=device) # UP
-            else:
-                transformed_action = torch.tensor([3], device=device) # DOWN
+            
+            if args.env == 'ALE/Pong-v5':
+                # 2, 3
+                if action == 0:
+                        transformed_action = torch.tensor([2], device=device) # UP
+                else:
+                    transformed_action = torch.tensor([3], device=device) # DOWN
+            
             obs, reward, terminated, truncated, info = env.step(transformed_action)
+            
             obs = torch.tensor(np.array(obs), device=device).float().unsqueeze(0)
             # print(f"obs: {obs.size()}")
             episode_return += reward
