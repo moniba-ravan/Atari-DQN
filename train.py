@@ -10,7 +10,7 @@ from dqn import DQN, ReplayMemory, optimize
 import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
+# device = torch.device("cpu")
 parser = argparse.ArgumentParser()
 parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")
 parser.add_argument('--evaluate_freq', type=int, default=25, help='How often to run evaluation.', nargs='?')
