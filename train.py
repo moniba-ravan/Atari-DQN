@@ -4,15 +4,16 @@ import gymnasium as gym
 import torch
 import config
 import os
-from utils import preprocess, append_to_csv, transform_action
+from utils import preprocess, append_to_csv, transform_action, show_time
 from evaluate import evaluate_policy
 from dqn import DQN, ReplayMemory, optimize
 import matplotlib.pyplot as plt
 
+import time 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = torch.device("cpu")
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")
+parser.add_argument('--env', choices=["ALE/Pong-v5", "CartPole-v1"], default="ALE/Pong-v5")
 parser.add_argument('--evaluate_freq', type=int, default=25, help='How often to run evaluation.', nargs='?')
 parser.add_argument('--evaluation_episodes', type=int, default=5, help='Number of evaluation episodes.', nargs='?')
 
@@ -35,6 +36,11 @@ if __name__ == '__main__':
 
     # Initialize deep Q-networks.
     dqn = DQN(env_config=env_config).to(device)
+
+    # Load the saved model
+    # saved_model_path = f'models/{args.env}_best.pt'
+    # dqn.load_state_dict(torch.load(saved_model_path))
+
     # TODO: Create and initialize target Q-network.
     target_dqn = DQN(env_config=env_config).to(device)
     target_dqn.load_state_dict(dqn.state_dict()) # Copies weights from dqn
@@ -48,7 +54,13 @@ if __name__ == '__main__':
     best_mean_return = -float("Inf")
     mean_returns = []
     steps_done = 0
+
+    start_training_time = time.time() # Start time measurement
+    
     for episode in range(env_config['n_episodes']):
+
+        start_episode_time = time.time()
+
         terminated = False
         truncated = False
         obs, info = env.reset()
@@ -107,7 +119,8 @@ if __name__ == '__main__':
         # Evaluate the current agent.
         if episode % args.evaluate_freq == 0:
             mean_return = evaluate_policy(dqn, env, env_config, args, n_episodes=args.evaluation_episodes)
-            print(f'Episode {episode+1}/{env_config["n_episodes"]}: {mean_return}')
+            elapsed_time = time.time() - start_episode_time
+            print(f'Episode {episode+1}/{env_config["n_episodes"]}: {mean_return} | Elapsed Time: {show_time(elapsed_time)}.')
             mean_returns.append(mean_return)
 
             # Save current agent if it has the best performance so far.
@@ -116,6 +129,10 @@ if __name__ == '__main__':
                 os.makedirs('models/ALE', exist_ok=True)
                 print('Best performance so far! Saving model.')
                 torch.save(dqn, f'models/{args.env}_best.pt')
+    
+    total_training_time = time.time() - start_training_time
+    print(f'Total Training Time: {show_time(total_training_time)}.')
+
     append_to_csv(env_config, mean_returns)
     #PLOT
     evaluation_episodes = [1 + args.evaluate_freq * index for index in range(len(mean_returns))]

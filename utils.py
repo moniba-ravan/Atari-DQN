@@ -24,6 +24,12 @@ def transform_action(env, action):
     else:
         return action
 
+def show_time(total_seconds):
+    hours = int(total_seconds // 3600)
+    minutes = int((total_seconds % 3600) // 60)
+    seconds = int(total_seconds % 60)
+    return f"{hours} hours, {minutes} minutes, {seconds} seconds"
+
 def append_to_csv(config, mean_returns, csv_file = 'mean_return.csv'):
     
     if not os.path.exists(csv_file):
