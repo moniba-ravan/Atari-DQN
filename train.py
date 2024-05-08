@@ -4,7 +4,7 @@ import gymnasium as gym
 import torch
 import config
 import os
-from utils import preprocess, append_to_csv
+from utils import preprocess, append_to_csv, transform_action
 from evaluate import evaluate_policy
 from dqn import DQN, ReplayMemory, optimize
 import matplotlib.pyplot as plt
@@ -60,17 +60,8 @@ if __name__ == '__main__':
             action = dqn.act(obs).item()
             # print(f"action: {action}")
 
-            if args.env == 'ALE/Pong-v5':
-                # Act in the true environment.
-                # 2, 3
-                if action == 0:
-                    transformed_action = torch.tensor([2], device=device) # UP
-                else:
-                    transformed_action = torch.tensor([3], device=device) # DOWN
-            else:
-                transformed_action = action
                 
-            next_obs, reward, terminated, truncated, info = env.step(transformed_action)
+            next_obs, reward, terminated, truncated, info = env.step(transform_action(args.env, action))
 
             # Preprocess incoming observation.
             if not terminated and not truncated: 

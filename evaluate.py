@@ -4,7 +4,7 @@ import gymnasium as gym
 import torch
 import numpy as np
 import config
-from utils import preprocess
+from utils import preprocess, transform_action
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = torch.device("cpu")
@@ -44,18 +44,11 @@ def evaluate_policy(dqn, env, env_config, args, n_episodes, render=False, verbos
             
             action = dqn.act(obs, exploit=True).item()
             
-            if args.env == 'ALE/Pong-v5':
-                # 2, 3
-                if action == 0:
-                        transformed_action = torch.tensor([2], device=device) # UP
-                else:
-                    transformed_action = torch.tensor([3], device=device) # DOWN
-            else:
-                transformed_action = action
-            obs, reward, terminated, truncated, info = env.step(transformed_action)
+            obs, reward, terminated, truncated, info = env.step(transform_action(args.env, action))
             
             obs = torch.tensor(np.array(obs), device=device).float().unsqueeze(0)
             # print(f"obs: {obs.size()}")
+            
             episode_return += reward
         
         total_return += episode_return

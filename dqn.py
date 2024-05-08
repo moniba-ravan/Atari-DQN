@@ -102,7 +102,7 @@ class DQN(nn.Module):
                 q_values = self.forward(observation)
                 action = torch.argmax(q_values).unsqueeze(0) # Best action (max Q-value)
         else:
-            action = torch.tensor(random.choice([0,1]), device=observation.device)  # Random action
+            action = torch.tensor(random.choice([i for i in range(self.n_actions)]), device=observation.device)  # Random action
 
         return action
 
@@ -131,6 +131,7 @@ def optimize(dqn, target_dqn, memory, optimizer):
     # print(f"cuurent: {current_q_values}")
     # Next Q values are estimated by the target network
     next_q_values = target_dqn(next_observations).max(1)[0].detach()
+    
     # print(f"next_q {terminated}")
     next_q_values[terminated] = 0  # Zero Q value for terminated states
 
@@ -146,7 +147,7 @@ def optimize(dqn, target_dqn, memory, optimizer):
     nn.utils.clip_grad_value_(dqn.parameters(), 1) # Clip 
     optimizer.step()
 
-    dqn.update_eps_threshold() # !!!!!!!!!!!!!!!!!!!
+    dqn.update_eps_threshold()
 
     return loss.item()        
  

@@ -12,6 +12,17 @@ def preprocess(obs, env):
     # else:
     #     raise ValueError('Please add necessary observation preprocessing instructions to preprocess() in utils.py.')
 
+def transform_action(env, action):
+    if env == 'ALE/Pong-v5':
+            # Act in the true environment.
+            if action == 2:
+                return torch.tensor([0], device=device) # NOPT
+            elif action == 0:
+                return torch.tensor([2], device=device) # UP
+            elif action == 1:
+                return  torch.tensor([3], device=device) # DOWN
+    else:
+        return action
 
 def append_to_csv(config, mean_returns, csv_file = 'mean_return.csv'):
     
