@@ -1,6 +1,7 @@
 import torch
 import csv
 import os
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -46,6 +47,8 @@ def read_csv(csv_file = 'mean_return.csv'):
     
     # Read from the CSV file
     with open(csv_file, 'r', newline='') as file:
+        list_of_trains = list()
+        list_of_configs = list()
         reader = csv.reader(file)
         column_names = next(reader)
         for row in reader:
@@ -53,6 +56,8 @@ def read_csv(csv_file = 'mean_return.csv'):
             mean_returns = list()
             for idx, value in enumerate(row):
                 if idx == 0:
+                    continue
+                elif idx == 1:
                     config[column_names[idx]] = value
                 elif value.isdigit():
                     config[column_names[idx]] = int(value)
@@ -61,7 +66,40 @@ def read_csv(csv_file = 'mean_return.csv'):
                         config[column_names[idx]] = float(value)
                     except ValueError:
                         mean_returns = list(map(float, value.split(',')))
-            print(config)
-            print(mean_returns)
-            print(mean_returns[0])
+            # print(config)
+            # print(mean_returns)
+            list_of_trains.append(mean_returns)
+            list_of_configs.append(config)
+        return list_of_configs, list_of_trains
+    
+def show_plot(env, list_of_configs, all_mean_returns):
+    colors = ['black', 'blue', 'red', 'green', 'orange', 'purple']
+    alpha = 0.6
+    evaluation_episodes = [1 + 25 * index for index in range(len(all_mean_returns[0]))]
+    # Plot each experiment
+    i = 0
+    plt.plot(evaluation_episodes, all_mean_returns[i], label=f'Default', linewidth=3, color=colors[i])
+    i = 1
+    plt.plot(evaluation_episodes, all_mean_returns[i], label=f'Experiment {i}', alpha=alpha, color=colors[i])
+    i = 2
+    plt.plot(evaluation_episodes, all_mean_returns[i], label=f'Experiment {i}', alpha=alpha, color=colors[i])
+    i = 3
+    plt.plot(evaluation_episodes, all_mean_returns[i], label=f'Experiment {i}', alpha=alpha, color=colors[i])
+    i = 4
+    plt.plot(evaluation_episodes, all_mean_returns[i], label=f'Experiment {i}', alpha=alpha, color=colors[i])
+    i = 5
+    plt.plot(evaluation_episodes, all_mean_returns[i], label=f'Experiment {i}', alpha=alpha, color=colors[i])
+    
+   
 
+    plt.xlabel("Episode")
+    plt.ylabel("Mean Return")
+    plt.title("Evaluated mean returns")
+    plt.legend()
+    if env == 'ALE/Pong-v5':
+        plt.savefig("PONG_mean_returns_plot.png")
+        plt.savefig("PONG_mean_returns_plot.eps")
+    else:
+        plt.savefig("CARTPOLE_mean_returns_plot.png") 
+        plt.savefig("CARTPOLE_mean_returns_plot.eps")  
+    plt.show()
