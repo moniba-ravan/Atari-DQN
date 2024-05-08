@@ -2,7 +2,6 @@
 __pycache__/
 
 # Ignore specific Python files
-extra.py
 test.py
 
 mean_return.csv
