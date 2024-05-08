@@ -7,7 +7,7 @@ import config
 from utils import preprocess, transform_action
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = torch.device("cpu")
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env', choices=["ALE/Pong-v5", 'CartPole-v1'], default="ALE/Pong-v5")
@@ -16,7 +16,7 @@ parser.add_argument('--n_eval_episodes', type=int, default=1, help='Number of ev
 parser.add_argument('--render', dest='render', action='store_true', help='Render the environment.')
 parser.add_argument('--save_video', dest='save_video', action='store_true', help='Save the episodes as video.')
 parser.set_defaults(render=False)
-parser.set_defaults(save_video=False)
+parser.set_defaults(save_video=True)
 
 # Hyperparameter configurations for different environments. See config.py.
 ENV_CONFIGS = {
@@ -31,8 +31,7 @@ def evaluate_policy(dqn, env, env_config, args, n_episodes, render=False, verbos
     for i in range(n_episodes):
         obs, info = env.reset()
         obs = torch.tensor(np.array(obs), device=device).float().unsqueeze(0)
-        # obs_stack = torch.cat(dqn.obs_stack_size * [obs]).unsqueeze(0).to(device)
-        # print(f"obs from env.resest(): {obs.size()}")
+       
         terminated = False
         truncated = False
 
@@ -70,6 +69,10 @@ if __name__ == '__main__':
         env = gym.make(args.env, render_mode='rgb_array')
         env = gym.wrappers.RecordVideo(env, './video/', episode_trigger=lambda episode_id: True)
 
+    if args.env == 'ALE/Pong-v5':
+        env = gym.wrappers.AtariPreprocessing(env, screen_size=84, grayscale_obs=True, frame_skip=1, noop_max=30, scale_obs = True)
+        env = gym.wrappers.FrameStack(env, env_config['obs_stack_size'])
+        
     # Load model from provided path.
     dqn = torch.load(args.path, map_location=torch.device(device))
     dqn.eval()
