@@ -3,7 +3,3 @@ __pycache__/
 
 # Ignore specific Python files
 test.py
-
-mean_return.csv
-
-video/

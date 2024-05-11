@@ -1,0 +1,2 @@
+env_name,memory_size,n_episodes,batch_size,target_update_frequency,train_frequency,gamma,lr,eps_start,eps_end,anneal_length,n_actions,Mean Return
+CartPole-v1,50000,50,32,100,1,0.95,0.0001,1.0,0.05,10000,2,"9.2,9.4"
