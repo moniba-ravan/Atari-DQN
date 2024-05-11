@@ -63,7 +63,12 @@ if __name__ == '__main__':
 
     if args.save_video:
         env = gym.make(args.env, render_mode='rgb_array')
-        env = gym.wrappers.RecordVideo(env, './video/', episode_trigger=lambda episode_id: True)
+        video_path = "./video/"
+        if args.env == "ALE/Pong-v5":
+            video_path += "pong/"
+        else:
+            video_path += "cartpole/"
+        env = gym.wrappers.RecordVideo(env, video_path, episode_trigger=lambda episode_id: True)
 
     if args.env == 'ALE/Pong-v5':
         # Setup the size of each frame and number of frames.
