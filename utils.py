@@ -43,7 +43,7 @@ def show_time(total_seconds):
     seconds = int(total_seconds % 60)
     return f"{hours} hours, {minutes} minutes, {seconds} seconds"
 
-def append_to_csv(config, mean_returns, env='ALE/Pong-v5'):
+def append_to_csv(config, mean_returns, env):
     """
     Append mean returns to a CSV file.
 
@@ -62,10 +62,14 @@ def append_to_csv(config, mean_returns, env='ALE/Pong-v5'):
         with open(csv_file, 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=list(config.keys())+['Mean Return'])
             writer.writeheader()
+    num_lines = 1
+    with open(csv_file, "rbU") as file:
+        num_lines = sum(1 for _ in file)
+    
     mean_returns_str = ','.join(map(str, mean_returns))
     with open(csv_file, 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(list(config.values()) + [mean_returns_str])
+        writer.writerow([num_lines-1]+list(config.values()) + [mean_returns_str])
 
 def read_csv(env):
     if env == 'ALE/Pong-v5':

@@ -126,7 +126,7 @@ if __name__ == '__main__':
     print(f'Total Training Time: {show_time(total_training_time)}.')
 
     # Keeping the results
-    append_to_csv(env_config, mean_returns)
+    append_to_csv(env_config, mean_returns, args.env)
 
     #PLOT
     save_plot(mean_returns, args.evaluate_freq, args.env)
