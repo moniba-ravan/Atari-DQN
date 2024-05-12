@@ -1,41 +1,79 @@
-# Deep Q-Network (DQN) for Reinforcement Learning
+# Learning to play Atari games with DQN
 
 ## Overview
-This project implements a Deep Q-Network (DQN) to solve reinforcement learning tasks in two different environments: CartPole-v1 and Pong (using ALE/Pong-v5 environment).
+Contained within this repository is our implementation tackling a project from the Reinforcement Learning course (7.5 ECTS - 1RT747) at Uppsala University. The project focuses on deploying a Deep Q-Network (DQN) to tackle reinforcement learning challenges across two distinct environments: CartPole and Pong.DQN employs a neural network to approximate the Q-value function, enabling it to map more complex state-action spaces to optimal Q-values while ensuring effective usage of memory and computational resources.
 
-## Files
+### Cartpole
+We present the training results of our DQN agent in the Cartpole-v1. The environment provides observations as an array of four floating point numbers describing the position and velocity of the cart as well as the angular position and angular velocity of the pole. The reward is a scalar value of +1 for each time step in which the pole remains upright. The maximum possible total reward for an episode is 500. The cart can perform two actions: Movement to the right or left.
 
-### `config.py`
-This file contains configurations and hyperparameters for the DQN algorithm. It allows users to easily adjust parameters such as memory size, number of episodes, batch size, learning rate, and exploration rate, among others.
+#### Hyperparameter Experiments
+Various adjustments were made to the hyperparameters during training.These insights into the effects of hyperparameter adjustments will inform future refinements of the DQN agent for more challenging environments.
+Our initial DQN agent was trained using default hyperparameters. The mean return of the agent stabilizes between 400 and 500 over 1000 episodes, demonstrating successful learning of the task. 
 
-### `dqn.py`
-Defines the structure of the Deep Q-Network (DQN) model using PyTorch. It includes classes for both the DQN model and the replay memory buffer.
 
-### `train.py`
-This script contains the training loop for the DQN algorithm. It initializes the environment, trains the DQN model, and periodically evaluates its performance.
+|                    | batch\_size | target\_update\_freq | gamma | lr      | eps\_start | eps\_end | anneal\_length | **final\_return** | **best\_return** |
+|--------------------|-------------|----------------------|-------|---------|------------|----------|----------------|-------------------|------------------|
+| Default            | 32          | 100                  | 0.95  | 0.0001  | 1.0        | 0.05     | 10000          | 439.4             | 500.0            |
+| Exp1               | 32          | 100                  | 0.95  | 0.0001  | 1.0        | **0.01** | 10000          | 244.6             | 433.8            |
+| Exp2               | **64**      | 100                  | 0.95  | 0.0001  | 1.0        | 0.05     | 10000          | 253.2             | 410.8            |
+| Exp3               | 32          | **10**               | 0.95  | 0.0001  | 1.0        | 0.05     | 10000          | 485.8             | 499.0            |
+| Exp4               | 32          | **1000**             | 0.95  | 0.0001  | 1.0        | 0.05     | 10000          | 175.6             | 379.6            |
+| Exp5               | 32          | 100                  | 0.95  | **0.001**| 1.0        | 0.05     | 10000          | 241.2             | 500.0            |
 
-### `evaluate.py`
-Provides functionality to evaluate the trained DQN model on the specified environment. It loads a pre-trained model and runs evaluation episodes to measure its performance.
+- Experiment 1: Decreasing epsilon end value had minimal impact on training performance.
+- Experiment 2: Increasing batch size led to more stable training but slower convergence.
+- Experiment 3: Reducing target update frequency improved performance by allowing more frequent updates between target and evaluation networks.
+- Experiment 4: Increasing target update frequency hindered learning due to infrequent updates.
+- Experiment 5: Increasing the learning rate resulted in unstable training dynamics. 
 
-## Usage
+![](.\plots\Summary\cartpole_plot.png)
 
-1. **Setting Hyperparameters**: Modify the hyperparameters in `config.py` according to your requirements and the environment you want to train the DQN for.
 
-2. **Training the Model**: Run `train.py` to train the DQN model. The script will iterate over episodes, updating the model parameters and periodically evaluating the model's performance.
 
-3. **Evaluating the Model**: Use `evaluate.py` to assess the performance of the trained model. You can specify the path to the saved model and the number of evaluation episodes to run.
+### Pong
+Within this section, we explore the training outcomes of our agent in the ALE/Pong-v5
+environment. The agent’s observations are represented by a stack of four consecu-
+tive frames, which are essential for perceiving motion and accurately predicting the
+ball’s trajectory. The agent receives a score of +1 for every point scored against
+the opponent, and -1 for every point scored by the opponent. The game continues
+until one player reaches a score of 21. In this environment, the agent has three
+possible actions: move the paddle up, move it down or no movement.
 
-## Dependencies
+#### Hyperparameter Experiments
+In the following, we performed 7 experiments in which we changed individual
+hyperparameter values separately and in combination, while leaving the other pa-
+rameters at their default settings. At the end, based on the model that performed
+best, we continued the training on that model with fine-tuned parameters. An
+overview of the hyperparameters used and the corresponding final mean and best
+mean return value after 2500 episodes can be found in the table. The results are
+shown in Figure.
 
-- Python 3.x
-- PyTorch
-- Gymnasium
-- NumPy
-- Matplotlib
 
-## Additional Notes
+| Parameter     | memory\_size | n\_episodes | tar\_upd\_fre | gamma | lr       | eps\_start | eps\_end | ann\_length | n\_actions | final\_return | best\_return |
+|---------------|--------------|-------------|---------------|-------|----------|------------|----------|-------------|------------|---------------|--------------|
+| Def           | 10000        | 1000        | 1000          | 0.99  | 0.0001   | 1.0        | 0.01     | 10^6        | 2          | 15.4          | 18           |
+| Exp1          | 10000        | 2500        | **4000**      | 0.99  | **0.00009**| 1.0        | 0.01     | 10^6        | 2          | 12.4          | 17           |
+| Exp2          | 10000        | 2500        | 1000          | **0.95**| 0.0001   | 1.0        | 0.01     | 10^6        | 2          | 18.2          | 18.6         |
+| Exp3          | **100000**   | 2500        | **4000**      | 0.99  | 0.0001   | 1.0        | 0.01     | 10^6        | 2          | 16.8          | 19           |
+| Exp4          | **100000**   | 2500        | **8000**      | 0.99  | 0.0001   | 1.0        | 0.01     | 10^6        | 2          | 17.8          | 19.2         |
+| Exp5          | 10000        | **3000**    | 1000          | 0.99  | 0.0001   | 1.0        | 0.01     | **10^4**    | 2          | 17.6          | **19.6**     |
+| Exp6          | 10000        | 2500        | 1000          | **0.95**| 0.0001   | 1.0        | 0.01     | 10^6        | **3**          | 17.2          | 18.6         |
+| Exp7          | 10000        | 2500        | **100**       | **0.95**| 0.0001   | 1.0        | 0.01     | 10^6        | **3**      | 17.6          | 19           |
 
-- Make sure to have the necessary dependencies installed before running the scripts.
-- The project includes environments for both CartPole-v1 and Pong. You can choose the desired environment using command-line arguments when running the scripts.
+- Experiment 1: Lowered learning rate slows convergence; target update frequency increase hinders learning.
+- Experiment 2: Lowered discount factor affects long-term rewards, yielding slower, less stable training dynamics.
+- Experiment 3: Enlarged replay memory and less frequent target updates stabilize training, albeit with slower learning.
+- Experiment 4: Further reduced target update frequency, showing minimal impact on training dynamics.
+- Experiment 5: Faster decay rate of exploration leads to quicker exploitation, potentially risking insufficient exploration.
+- Experiment 6: Increased action space from two to three shows minor impact on training stability and performance.
+- Experiment 7: More frequent target updates and larger action space accelerate learning without destabilizing training.
+- Fine-tuning of best model (Experiment 7) with reduced learning rate, larger batch size, and decreased exploration yields significant performance improvement. 
 
-Feel free to explore and customize the code to adapt it to different environments or experiment with various hyperparameters for reinforcement learning tasks.
+![](.\plots\Summary\pong_plot.png)
+
+
+## Project Members:
+- S.Moniba Ravan
+- Chen Gu
+- André Ramos Ekengren
+- Nora Derner
