@@ -26,7 +26,7 @@ Our initial DQN agent was trained using default hyperparameters. The mean return
 - Experiment 4: Increasing target update frequency hindered learning due to infrequent updates.
 - Experiment 5: Increasing the learning rate resulted in unstable training dynamics. 
 
-![](plots\Summary\cartpole_plot.png)
+![](\plots\Summary\cartpole_plot.png)
 
 
 
@@ -67,9 +67,9 @@ shown in Figure.
 - Experiment 5: Faster decay rate of exploration leads to quicker exploitation, potentially risking insufficient exploration.
 - Experiment 6: Increased action space from two to three shows minor impact on training stability and performance.
 - Experiment 7: More frequent target updates and larger action space accelerate learning without destabilizing training.
-- Fine-tuning of best model (Experiment 7) with reduced learning rate, larger batch size, and decreased exploration yields significant performance improvement. 
+- Fine-tuning of best model (Experiment 7) with reduced learning rate to 1e-6, batch size 64 , and lowered epsilon start from 0.5 to 0.05 yields remarkable average return of 19.8, validating the efficacy of our optimizations. 
 
-![](plots\Summary\pong_plot.png)
+![](\plots\Summary\pong_plot.png)
 
 
 ## Project Members:
