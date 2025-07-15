@@ -5,7 +5,6 @@ Contained within this repository is our implementation tackling a project from t
 
 ### Cartpole
 ![Image](https://github.com/user-attachments/assets/52d8a99b-d2f7-44ff-840e-d18b4661d427)
-![Image](https://github.com/user-attachments/assets/68094599-3969-46b0-8769-c2c1bac70e74)
 
 We present the training results of our DQN agent in the Cartpole-v1. The environment provides observations as an array of four floating point numbers describing the position and velocity of the cart as well as the angular position and angular velocity of the pole. The reward is a scalar value of +1 for each time step in which the pole remains upright. The maximum possible total reward for an episode is 500. The cart can perform two actions: Movement to the right or left.
 
