@@ -33,7 +33,7 @@ Our initial DQN agent was trained using default hyperparameters. The mean return
 
 
 ### Pong
-![Image](https://github.com/user-attachments/assets/0f72f603-a946-45d3-8603-963fc5e2250c)
+![Image](https://github.com/user-attachments/assets/4217ebfb-4734-44b0-bbc4-c688b0e41b6c)
 
 Within this section, we explore the training outcomes of our agent in the ALE/Pong-v5
 environment. The agent’s observations are represented by a stack of four consecu-
