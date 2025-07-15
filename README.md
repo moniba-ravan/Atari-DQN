@@ -3,12 +3,7 @@
 ## Overview
 Contained within this repository is our implementation tackling a project from the Reinforcement Learning course (7.5 ECTS - 1RT747) at Uppsala University. The project focuses on deploying a Deep Q-Network (DQN) to tackle reinforcement learning challenges across two distinct environments: CartPole and Pong. DQN employs a neural network to approximate the Q-value function, enabling it to map more complex state-action spaces to optimal Q-values while ensuring effective usage of memory and computational resources.
 ![Image](https://github.com/user-attachments/assets/d603c1b1-f1d9-4438-9095-e9ddd30d817a)
-![Image](https://github.com/user-attachments/assets/b91a984d-ad1e-45b1-b689-917a41370e7f)
-
-![Image](https://github.com/user-attachments/assets/9e26c853-602a-46ef-b565-b8f6f3faf914)
-
-▶️ [Watch Cartpole demo video](https://github.com/moniba-ravan/Atari-DQN/blob/main/video/cartpole/rl-video-episode-0.mp4)
-▶️ [Watch Pong demo video](https://github.com/moniba-ravan/Atari-DQN/blob/main/video/pong/rl-video-episode-0.mp4)
+![Image](https://github.com/user-attachments/assets/d603c1b1-f1d9-4438-9095-e9ddd30d817a)
 
 ### Cartpole
 We present the training results of our DQN agent in the Cartpole-v1. The environment provides observations as an array of four floating point numbers describing the position and velocity of the cart as well as the angular position and angular velocity of the pole. The reward is a scalar value of +1 for each time step in which the pole remains upright. The maximum possible total reward for an episode is 500. The cart can perform two actions: Movement to the right or left.
