@@ -3,7 +3,7 @@
 ## Overview
 Contained within this repository is our implementation tackling a project from the Reinforcement Learning course (7.5 ECTS - 1RT747) at Uppsala University. The project focuses on deploying a Deep Q-Network (DQN) to tackle reinforcement learning challenges across two distinct environments: CartPole and Pong. DQN employs a neural network to approximate the Q-value function, enabling it to map more complex state-action spaces to optimal Q-values while ensuring effective usage of memory and computational resources.
 
-▶️ [Watch Cartpole demo video](https://github.com/moniba-ravan/Atari-DQN/blob/main/video/pong/rl-video-episode-0.mp4)
+▶️ [Watch Cartpole demo video](https://github.com/moniba-ravan/Atari-DQN/blob/main/video/cartpole/rl-video-episode-0.mp4)
 ▶️ [Watch Pong demo video](https://github.com/moniba-ravan/Atari-DQN/blob/main/video/pong/rl-video-episode-0.mp4)
 
 ### Cartpole
