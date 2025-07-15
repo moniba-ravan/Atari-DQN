@@ -3,13 +3,8 @@
 ## Overview
 Contained within this repository is our implementation tackling a project from the Reinforcement Learning course (7.5 ECTS - 1RT747) at Uppsala University. The project focuses on deploying a Deep Q-Network (DQN) to tackle reinforcement learning challenges across two distinct environments: CartPole and Pong. DQN employs a neural network to approximate the Q-value function, enabling it to map more complex state-action spaces to optimal Q-values while ensuring effective usage of memory and computational resources.
 
-![Image](https://github.com/user-attachments/assets/68094599-3969-46b0-8769-c2c1bac70e74)
-![Image](https://github.com/user-attachments/assets/0f72f603-a946-45d3-8603-963fc5e2250c)
-
-![Image](https://github.com/user-attachments/assets/d603c1b1-f1d9-4438-9095-e9ddd30d817a)
-![Image](https://github.com/user-attachments/assets/d603c1b1-f1d9-4438-9095-e9ddd30d817a)
-
 ### Cartpole
+![Image](https://github.com/user-attachments/assets/68094599-3969-46b0-8769-c2c1bac70e74)
 We present the training results of our DQN agent in the Cartpole-v1. The environment provides observations as an array of four floating point numbers describing the position and velocity of the cart as well as the angular position and angular velocity of the pole. The reward is a scalar value of +1 for each time step in which the pole remains upright. The maximum possible total reward for an episode is 500. The cart can perform two actions: Movement to the right or left.
 
 #### Hyperparameter Experiments
@@ -37,6 +32,8 @@ Our initial DQN agent was trained using default hyperparameters. The mean return
 
 
 ### Pong
+![Image](https://github.com/user-attachments/assets/0f72f603-a946-45d3-8603-963fc5e2250c)
+
 Within this section, we explore the training outcomes of our agent in the ALE/Pong-v5
 environment. The agent’s observations are represented by a stack of four consecu-
 tive frames, which are essential for perceiving motion and accurately predicting the
