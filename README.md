@@ -4,6 +4,7 @@
 Contained within this repository is our implementation tackling a project from the Reinforcement Learning course (7.5 ECTS - 1RT747) at Uppsala University. The project focuses on deploying a Deep Q-Network (DQN) to tackle reinforcement learning challenges across two distinct environments: CartPole and Pong. DQN employs a neural network to approximate the Q-value function, enabling it to map more complex state-action spaces to optimal Q-values while ensuring effective usage of memory and computational resources.
 
 ### Cartpole
+![Image](https://github.com/user-attachments/assets/52d8a99b-d2f7-44ff-840e-d18b4661d427)
 ![Image](https://github.com/user-attachments/assets/68094599-3969-46b0-8769-c2c1bac70e74)
 
 We present the training results of our DQN agent in the Cartpole-v1. The environment provides observations as an array of four floating point numbers describing the position and velocity of the cart as well as the angular position and angular velocity of the pole. The reward is a scalar value of +1 for each time step in which the pole remains upright. The maximum possible total reward for an episode is 500. The cart can perform two actions: Movement to the right or left.
@@ -37,21 +38,10 @@ Our initial DQN agent was trained using default hyperparameters. The mean return
 
 
 Within this section, we explore the training outcomes of our agent in the ALE/Pong-v5
-environment. The agent’s observations are represented by a stack of four consecu-
-tive frames, which are essential for perceiving motion and accurately predicting the
-ball’s trajectory. The agent receives a score of +1 for every point scored against
-the opponent, and -1 for every point scored by the opponent. The game continues
-until one player reaches a score of 21. In this environment, the agent has three
-possible actions: move the paddle up, move it down or no movement.
+environment. The agent’s observations are represented by a stack of four consecutive frames, which are essential for perceiving motion and accurately predicting the ball’s trajectory. The agent receives a score of +1 for every point scored against the opponent, and -1 for every point scored by the opponent. The game continues until one player reaches a score of 21. In this environment, the agent has three possible actions: move the paddle up, move it down or no movement.
 
 #### Hyperparameter Experiments
-In the following, we performed 7 experiments in which we changed individual
-hyperparameter values separately and in combination, while leaving the other pa-
-rameters at their default settings. At the end, based on the model that performed
-best, we continued the training on that model with fine-tuned parameters. An
-overview of the hyperparameters used and the corresponding final mean and best
-mean return value after 2500 episodes can be found in the table. The results are
-shown in Figure.
+In the following, we performed 7 experiments in which we changed individual hyperparameter values separately and in combination, while leaving the other parameters at their default settings. At the end, based on the model that performed best, we continued the training on that model with fine-tuned parameters. An overview of the hyperparameters used and the corresponding final mean and best mean return value after 2500 episodes can be found in the table. The results are shown in Figure.
 
 
 | Parameter     | memory\_size | n\_episodes | tar\_upd\_fre | gamma | lr       | eps\_start | eps\_end | ann\_length | n\_actions | final\_return | best\_return |
