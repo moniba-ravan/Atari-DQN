@@ -33,6 +33,7 @@ Our initial DQN agent was trained using default hyperparameters. The mean return
 
 
 ### Pong
+![Image](https://github.com/user-attachments/assets/e28ecaf9-445d-4586-9f84-18613d98cf8c)
 ![Image](https://github.com/user-attachments/assets/0f72f603-a946-45d3-8603-963fc5e2250c)
 
 
