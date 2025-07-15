@@ -34,8 +34,6 @@ Our initial DQN agent was trained using default hyperparameters. The mean return
 
 ### Pong
 ![Image](https://github.com/user-attachments/assets/e28ecaf9-445d-4586-9f84-18613d98cf8c)
-![Image](https://github.com/user-attachments/assets/0f72f603-a946-45d3-8603-963fc5e2250c)
-
 
 Within this section, we explore the training outcomes of our agent in the ALE/Pong-v5
 environment. The agent’s observations are represented by a stack of four consecutive frames, which are essential for perceiving motion and accurately predicting the ball’s trajectory. The agent receives a score of +1 for every point scored against the opponent, and -1 for every point scored by the opponent. The game continues until one player reaches a score of 21. In this environment, the agent has three possible actions: move the paddle up, move it down or no movement.
