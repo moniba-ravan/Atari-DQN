@@ -1,4 +1,4 @@
-# Learning to play Atari games with DQN
+# Training Deep Q-Networks to Play CartPole and Atari Pong
 
 ## Overview
 Contained within this repository is our implementation tackling a project from the Reinforcement Learning course (7.5 ECTS - 1RT747) at Uppsala University. The project focuses on deploying a Deep Q-Network (DQN) to tackle reinforcement learning challenges across two distinct environments: CartPole and Pong. DQN employs a neural network to approximate the Q-value function, enabling it to map more complex state-action spaces to optimal Q-values while ensuring effective usage of memory and computational resources.
